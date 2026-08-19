@@ -19,7 +19,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <sonar.host.url>https.sonarcloud.io</sonar.host.url>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <google-api-client.version>1.32.1</google-api-client.version>
         <spring-cloud-aws.version>3.1.1</spring-cloud-aws.version>
