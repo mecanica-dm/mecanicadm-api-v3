@@ -36,7 +36,7 @@ class WorkOrderBudgetControllerUnitTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(controller, "baseUrl", "http://localhost:8080");
+        ReflectionTestUtils.setField(controller, "baseUrl", "http://localhost:/api");
     }
 
     @Test
