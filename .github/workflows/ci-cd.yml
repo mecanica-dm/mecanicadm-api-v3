@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_REPO: ${{ secrets.DOCKER_IMAGE_REPO }}
+  IMAGE_REPO: ${{ vars.DOCKER_IMAGE_REPO }}
   IMAGE_TAG: prod-${{ github.sha }}
   CI_IMAGE: mecanicadm-api:ci
 
