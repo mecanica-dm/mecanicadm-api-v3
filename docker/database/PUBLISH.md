@@ -17,6 +17,6 @@ docker run --rm --env-file .env mecanica-dm-seeder
 Replace `<registry>` with your registry URL (e.g., `docker.io`, `ghcr.io`).
 
 ```bash
-docker tag mecanica-dm-seeder guilhermemuchon/mecanica-dm-seeder:latest
-docker push guilhermemuchon/mecanica-dm-seeder:latest
+docker tag mecanica-dm-seeder diegopriess/mecanica-dm-seeder:latest
+docker push diegopriess/mecanica-dm-seeder:latest
 ```

@@ -74,7 +74,7 @@ class SendWorkOrderBudgetUseCaseTest {
         when(getPrintableBudgetUseCase.execute(any())).thenReturn(pdfResponse);
         when(tokenGateway.create(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080"));
+        useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080/api"));
 
         verify(gateway).saveBudget(any());
         verify(tokenGateway).create(any());
@@ -87,7 +87,7 @@ class SendWorkOrderBudgetUseCaseTest {
         when(gateway.findById(workOrderId)).thenReturn(Optional.empty());
 
         assertThrows(WorkOrderExceptions.NotFound.class,
-                () -> useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080")));
+                () -> useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080/api")));
 
         verify(gateway, never()).saveBudget(any());
     }
@@ -104,7 +104,7 @@ class SendWorkOrderBudgetUseCaseTest {
         when(gateway.findById(workOrderId)).thenReturn(Optional.of(woWithoutBudget));
 
         assertThrows(WorkOrderExceptions.BudgetNotFound.class,
-                () -> useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080")));
+                () -> useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080/api")));
     }
 
     @Test
@@ -114,7 +114,7 @@ class SendWorkOrderBudgetUseCaseTest {
         when(clientGateway.findById(clientId)).thenReturn(Optional.empty());
         when(tokenGateway.create(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080"));
+        useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080/api"));
 
         verify(gateway).saveBudget(any());
         verify(tokenGateway).create(any());
@@ -130,7 +130,7 @@ class SendWorkOrderBudgetUseCaseTest {
         when(getPrintableBudgetUseCase.execute(any())).thenThrow(new RuntimeException("PDF error"));
         when(tokenGateway.create(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080"));
+        useCase.execute(new SendWorkOrderBudgetCommand(workOrderId, "http://localhost:8080/api"));
 
         verify(emailService).send(eq("joao@test.com"), anyString(), anyString(), isNull());
     }
