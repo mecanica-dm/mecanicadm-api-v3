@@ -93,7 +93,7 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 <div align="center">
 
 ```mermaid
-flowchart TD
+flowchart LR
     TRIGGER[Disparo do Workflow] --> COND{Evento}
     COND -->|push| M1[Branch: main]
     COND -->|pull_request| PR[Pipeline PR]
@@ -104,7 +104,7 @@ flowchart TD
     WD --> BUILD
 
     subgraph BUILD[build-and-test]
-        direction TB
+        direction LR
         A1[Checkout]
         A2[Setup JDK 21]
         A3[Build e Testes]
@@ -113,7 +113,7 @@ flowchart TD
     end
 
     subgraph SEC[security-scan]
-        direction TB
+        direction LR
         S1[Checkout]
         S2[Subir aplicação]
         S3[ZAP Scan OpenAPI]
@@ -125,7 +125,7 @@ flowchart TD
     BUILD -->|sucesso| SEC
 
     subgraph PUB[publish-and-deploy]
-        direction TB
+        direction LR
         P1[Login Docker Hub]
         P2[Build e push imagem]
         P3[Disparar deploy K8s]
