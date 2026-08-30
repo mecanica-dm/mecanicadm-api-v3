@@ -55,7 +55,7 @@ A rota de impressão de orçamentos retorna o arquivo PDF codificado em uma stri
 
 ---
 
-## 🏛️ Arquitetura e Decisões (ADRs)
+## 🏛️ Arquitetura e Decisões
 
 O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean Architecture_ e _Domain-Driven Design (DDD)_, para garantir separação de responsabilidades, testabilidade e manutenibilidade. Além disso, as diretrizes de código são guiadas por **Architecture Decision Records (ADRs)** armazenadas no projeto.
 
@@ -65,7 +65,7 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 - `service`: Implementações concretas dos casos de uso isolados.
 - `infra`: Configurações de infraestrutura, segurança, tratamento global de exceções e configurações de banco de dados.
 
-### 📝 Nossas ADRs (`docs/adr/`):
+### 📝 ADRs (`docs/adr/`):
 
 - **[ADR 001 - Nomenclatura de Consultas](docs/adr/001-nomenclatura_consultas.md)**
 - ~~**[ADR 002 - Padrão UseCases e Commands](docs/adr/002-padrao_usecases_commands.md)**~~ 💤 Substituída por ADR 011
@@ -79,13 +79,18 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 - **[ADR 010 - Estratégia de i18n e Múltiplos Idiomas](docs/adr/010-estrategia_i18n_multi_idioma.md)**
 - **[ADR 011 - Arquitetura Limpa Purista para Novas Features 🆕](docs/adr/011-arquitetura-limpa-purista-novas-features.md)**
 
+### 📝 RFCs (`docs/rfc/`):
+
+- **[RFC 001 - Escolha de nuvem](docs/rfc/001-escolha_de_nuvem.md)**
+- **[RFC 002 - Escolha de banco de dados](docs/rfc/002-escolha_banco_de_dados.md)**
+
 ### Componentes da aplicação
 
 ![Componentes da aplicaçãõ](docs/assets/c4-componentes-mecanicadm.png)
 
 ### Fluxo de deploy
 
-![Fluxo de deploy](docs/assets/fluxo-deploy-mermaid.png)
+![Fluxo de deploy](docs/assets/old-assets/fluxo-deploy-mermaid.png)
 
 * build-and-test: Responsável por fazer o maven build e executar os testes da aplicação
 * build-docker-image: Aqui fazemos o build da imagem docker e publicamos para o Docker Hub
@@ -93,7 +98,7 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 
 ### Infraestrutura provisionada
 
-![Infraestrutura provisionada](docs/assets/infra-provisionada_02.png)
+![Infraestrutura provisionada](docs/assets/old-assets/infra-provisionada_02.png)
 
 * VPC: Virtual Private Cloud, um ambiente seguro e isolado onde podemos rodar os nossos recursos.  
 * Internet Gateway: Necessário para comunicação da VPC com a internet.
