@@ -90,6 +90,8 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 
 ### Fluxo de deploy
 
+[Link para imagem do fluxo](docs/assets/fluxo-deploy-fase-03.png)
+
 <div align="center">
 
 ```mermaid
@@ -145,6 +147,8 @@ flowchart LR
 * publish-and-deploy: Aqui fazemos o build da imagem docker e publicamos para o Docker Hub, além disso fazemos um trigger para rodar a próxima pipe do repositório de k8s
 
 ### Diagrama de Entidade-Relacionamento
+
+[Link para imagem do diagrama](docs/assets/erd-mecanicadm.png)
 
 ```mermaid
 erDiagram
