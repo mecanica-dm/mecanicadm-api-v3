@@ -288,6 +288,16 @@ erDiagram
     }
 ```
 
+### Diagramas de sequência
+
+#### Fluxo de OS
+
+![Diagrama de sequência - Fluxo de OS](docs/assets/Sequencia_OS.drawio.png)
+
+#### Fluxo de Autenticação
+
+![Diagrama de sequência - Fluxo de Autenticação](docs/assets/Sequencia_LAMBDA.drawio.png)
+
 ### Infraestrutura provisionada
 
 ![Infraestrutura provisionada](docs/assets/old-assets/infra-provisionada_02.png)
