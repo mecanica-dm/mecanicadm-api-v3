@@ -1,11 +1,11 @@
 # Mecânica DM - API de Gestão para Oficinas
 
-[![SonarCloud](https://img.shields.io/badge/SonarCloud-Security_&_Quality-orange?logo=sonarcloud)](https://sonarcloud.io/project/overview?id=mecanica-dm_mecanicadm-api-v3)
-![Versão da API](https://img.shields.io/badge/version-3.0.0-blue)
+[![SonarCloud](https://img.shields.io/badge/SonarCloud-Security_&_Quality-orange?logo=sonarcloud)](https://sonarcloud.io/project/overview?id=mecanica-dm_mecanicadm-api-v2)
+![Versão da API](https://img.shields.io/badge/version-0.0.1-blue)
 
 API RESTful para o sistema **Mecânica DM**, uma solução completa para gerenciamento de ordens de serviço, clientes, estoque e fluxo de trabalho em oficinas mecânicas.
 
-Na **Fase 03** do 15SOAT, temos o objetivo de melhorar a estrutura separando o projeto em diversos repositórios, implementar monitoramento/observabilidade, e melhorar a infraestrutura do projeto.
+Na **Fase 02** do 15SOAT, temos o objetivo de refatorar a arquitetura do projeto para Clean Architecture, implementar manifestos Kubernetes e o provisionamento da estrutura através do Terraform.
 
 ---
 
@@ -14,225 +14,7 @@ Na **Fase 03** do 15SOAT, temos o objetivo de melhorar a estrutura separando o p
 - **[Storytelling (Egon.io)](https://github.com/user-attachments/assets/fd2adfad-1fa9-469d-958a-1cf902666b36)**: Storytelling inicial do fluxo de funcionamento da mecânica.
 - **[Dicionário de Dados (Notion)](https://lopsided-hourglass-4f8.notion.site/Dicion-rio-de-dados-32f0a8ca8e738075ae44c9ec0b5180b3?source=copy_link)**: Visão detalhada das entidades e relacionamentos do banco de dados.
 - **[Event Storming (Miro)](https://miro.com/app/board/uXjVIT7cD_4=/?share_link_id=217316260154)**: Mapeamento de domínio e comportamento orientado a eventos do sistema.
-- **[Dashboard do SonarCloud](https://sonarcloud.io/project/overview?id=mecanica-dm_mecanicadm-api-v3)**: Análise contínua de qualidade de código, vulnerabilidades e cobertura de testes.
-
-### Componenetes de infraestrutura
-
-![Componentes de infraestrutura](docs/assets/c4-componentes-infra-mecanicadm.png)
-
-### Componentes da aplicação
-
-![Componentes da aplicação](docs/assets/c4-componentes-mecanicadm.png)
-
-### Fluxo de deploy
-
-[Link para imagem do fluxo](docs/assets/fluxo-deploy-fase-03.png)
-
-<div align="center">
-
-```mermaid
-flowchart LR
-    TRIGGER[Disparo do Workflow] --> COND{Evento}
-    COND -->|push| M1[Branch: main]
-    COND -->|pull_request| PR[Pipeline PR]
-    COND -->|workflow_dispatch| WD[Manual]
-
-    M1 --> BUILD
-    PR --> BUILD
-    WD --> BUILD
-
-    subgraph BUILD[build-and-test]
-        direction LR
-        A1[Checkout]
-        A2[Setup JDK 21]
-        A3[Build e Testes]
-        A4[Análise Sonar]
-        A1 --> A2 --> A3 --> A4
-    end
-
-    subgraph SEC[security-scan]
-        direction LR
-        S1[Checkout]
-        S2[Subir aplicação]
-        S3[ZAP Scan OpenAPI]
-        S4[Upload Relatório]
-        S5[Parar containers]
-        S1 --> S2 --> S3 --> S4 --> S5
-    end
-
-    BUILD -->|sucesso| SEC
-
-    subgraph PUB[publish-and-deploy]
-        direction LR
-        P1[Login Docker Hub]
-        P2[Build e push imagem]
-        P3[Disparar deploy K8s]
-        P1 --> P2 --> P3
-    end
-
-    SEC -->|sucesso| GATE{Em main?}
-    GATE -->|sim| PUB
-    GATE -->|não| FIM1[Fim - sem deploy]
-    PUB --> FIM2[Deploy no K8s]
-```
-
-</div>
-
-* build-and-test: Responsável por fazer o maven build e executar os testes da aplicação
-* security-scan: Rodamos o ZAP Scan para verificar problemas de segurança
-* publish-and-deploy: Aqui fazemos o build da imagem docker e publicamos para o Docker Hub, além disso fazemos um trigger para rodar a próxima pipe do repositório de k8s
-
-### Diagrama de Entidade-Relacionamento
-
-[Link para imagem do diagrama](docs/assets/erd-mecanicadm.png)
-
-```mermaid
-erDiagram
-    USERS ||--o{ USER_ROLES : "possui"
-    USERS ||--o{ PASSWORD_RESET_TOKENS : "solicita"
-
-    CLIENTS ||--o{ WORK_ORDERS : "possui"
-    VEHICLE ||--o{ WORK_ORDERS : "é utilizado em"
-
-    LABORS ||--o{ WORK_ORDER_LABOR_ITEMS : "é registrado em"
-    MATERIALS ||--o{ WORK_ORDER_MATERIAL_ITEMS : "é usado em"
-    MATERIALS ||--o{ STOCK_MOVEMENTS : "gera"
-
-    WORK_ORDERS ||--o{ WORK_ORDER_LABOR_ITEMS : "tem"
-    WORK_ORDERS ||--o{ WORK_ORDER_MATERIAL_ITEMS : "tem"
-    WORK_ORDERS ||--o{ WORK_ORDER_BUDGETS : "tem"
-    WORK_ORDERS ||--o{ STOCK_MOVEMENTS : "registra"
-    WORK_ORDERS ||--o{ BUDGET_DECISION_TOKENS : "gera"
-
-    USERS {
-        uuid id PK
-        timestamp date_created
-        timestamp date_updated
-        timestamp deleted_at
-        varchar email UK
-        varchar password
-        varchar name
-    }
-
-    USER_ROLES {
-        uuid user_id PK,FK
-        varchar role PK
-    }
-
-    PASSWORD_RESET_TOKENS {
-        uuid id PK
-        varchar token UK
-        uuid user_id FK
-        timestamp expiry_date
-    }
-
-    VEHICLE {
-        varchar license_plate PK
-        varchar model
-        varchar brand
-        smallint model_year
-        timestamp date_created
-        timestamp date_updated
-        timestamp deleted_at
-    }
-
-    CLIENTS {
-        uuid id PK
-        varchar name
-        varchar email UK
-        varchar document UK
-        varchar phone
-        timestamp date_created
-        timestamp date_updated
-        timestamp deleted_at
-    }
-
-    LABORS {
-        uuid id PK
-        varchar name
-        decimal price
-        timestamp date_created
-        timestamp date_updated
-        timestamp deleted_at
-    }
-
-    MATERIALS {
-        uuid id PK
-        varchar name
-        varchar brand
-        text description
-        decimal price
-        varchar type
-        timestamp date_created
-        timestamp date_updated
-        timestamp deleted_at
-    }
-
-    WORK_ORDERS {
-        uuid id PK
-        uuid client_id FK
-        varchar vehicle_id FK
-        text description
-        int status
-        timestamp execution_start_at
-        timestamp execution_end_at
-        timestamp date_created
-        timestamp date_updated
-        timestamp deleted_at
-    }
-
-    WORK_ORDER_LABOR_ITEMS {
-        uuid id PK
-        uuid work_order_id FK
-        uuid labor_id FK
-        varchar status
-        timestamp execution_start_at
-        timestamp execution_end_at
-    }
-
-    WORK_ORDER_MATERIAL_ITEMS {
-        uuid id PK
-        uuid work_order_id FK
-        uuid material_id FK
-        int quantity
-    }
-
-    WORK_ORDER_BUDGETS {
-        uuid work_order_id PK,FK
-        decimal total_price
-        varchar status
-        text observation
-    }
-
-    STOCK_MOVEMENTS {
-        uuid id PK
-        uuid material_id FK
-        uuid work_order_id FK
-        int quantity
-        varchar type
-        timestamp date_created
-        timestamp date_updated
-        timestamp deleted_at
-    }
-
-    BUDGET_DECISION_TOKENS {
-        uuid id PK
-        uuid work_order_id FK
-        varchar token UK
-        boolean used
-        timestamp created_at
-    }
-```
-
-### Diagramas de sequência
-
-#### Fluxo de OS
-
-![Diagrama de sequência - Fluxo de OS](docs/assets/Sequencia_OS.drawio.png)
-
-#### Fluxo de Autenticação
-
-![Diagrama de sequência - Fluxo de Autenticação](docs/assets/Sequencia_LAMBDA.drawio.png)
+- **[Dashboard do SonarCloud](https://sonarcloud.io/project/overview?id=mecanica-dm_mecanicadm-api-v2)**: Análise contínua de qualidade de código, vulnerabilidades e cobertura de testes.
 
 ---
 
@@ -273,7 +55,7 @@ A rota de impressão de orçamentos retorna o arquivo PDF codificado em uma stri
 
 ---
 
-## 🏛️ Arquitetura e Decisões
+## 🏛️ Arquitetura e Decisões (ADRs)
 
 O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean Architecture_ e _Domain-Driven Design (DDD)_, para garantir separação de responsabilidades, testabilidade e manutenibilidade. Além disso, as diretrizes de código são guiadas por **Architecture Decision Records (ADRs)** armazenadas no projeto.
 
@@ -283,7 +65,7 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 - `service`: Implementações concretas dos casos de uso isolados.
 - `infra`: Configurações de infraestrutura, segurança, tratamento global de exceções e configurações de banco de dados.
 
-### 📝 ADRs (`docs/adr/`):
+### 📝 Nossas ADRs (`docs/adr/`):
 
 - **[ADR 001 - Nomenclatura de Consultas](docs/adr/001-nomenclatura_consultas.md)**
 - ~~**[ADR 002 - Padrão UseCases e Commands](docs/adr/002-padrao_usecases_commands.md)**~~ 💤 Substituída por ADR 011
@@ -297,10 +79,28 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 - **[ADR 010 - Estratégia de i18n e Múltiplos Idiomas](docs/adr/010-estrategia_i18n_multi_idioma.md)**
 - **[ADR 011 - Arquitetura Limpa Purista para Novas Features 🆕](docs/adr/011-arquitetura-limpa-purista-novas-features.md)**
 
-### 📝 RFCs (`docs/rfc/`):
+### Componentes da aplicação
 
-- **[RFC 001 - Escolha de nuvem](docs/rfc/001-escolha_de_nuvem.md)**
-- **[RFC 002 - Escolha de banco de dados](docs/rfc/002-escolha_banco_de_dados.md)**
+![Componentes da aplicaçãõ](docs/assets/c4-componentes-mecanicadm.png)
+
+### Fluxo de deploy
+
+![Fluxo de deploy](docs/assets/fluxo-deploy-mermaid.png)
+
+* build-and-test: Responsável por fazer o maven build e executar os testes da aplicação
+* build-docker-image: Aqui fazemos o build da imagem docker e publicamos para o Docker Hub
+* deploy-to-kubernetes: Nessa etapa configuramos as credenciais da AWS e fazemos a aplicação do manifestos K8s
+
+### Infraestrutura provisionada
+
+![Infraestrutura provisionada](docs/assets/infra-provisionada_02.png)
+
+* VPC: Virtual Private Cloud, um ambiente seguro e isolado onde podemos rodar os nossos recursos.  
+* Internet Gateway: Necessário para comunicação da VPC com a internet.
+* EC2: Elastic Compute Cloud, as máquinas que criamos para executar os nossos serviços.
+* EKS: Elastic Kubernetes Service, serviço onde orquestramos os containers Kubernetes.
+
+Para ir mais a fundo em como executar o terraform do projeto, basta acessar a doc de [instruções do terraform](infra/terraform/instrucoes.md).
 
 ---
 
