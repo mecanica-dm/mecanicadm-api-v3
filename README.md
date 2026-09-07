@@ -341,7 +341,7 @@ Para ir mais a fundo em como executar o kubernetes no projeto, basta acessar a d
 
 Com a API em execução, a documentação interativa do Swagger UI fica disponível em:
 
-`http://localhost:80/swagger-ui.html`
+`http://localhost:8080/api/swagger-ui/index.html`
 
 A especificação OpenAPI 3 pode ser acessada em `/v3/api-docs`.
 
