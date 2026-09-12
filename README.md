@@ -306,34 +306,48 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 
 ## 🏁 Como Começar
 
-Obs: Caso queira executar o ambiente sem o kubernetes, o passo a passo para execução com apenas o docker compose pode ser encontrado no README da fase um no [diretório de READMEs antigos](docs/old-readme/README-fase01.md).
-* Apenas se atentar para criar o arquivo .env, temos o exemplo .env.example para isso
-
 ### Pré-requisitos
 
 - [Docker](https://www.docker.com/get-started) e [Docker Compose](https://docs.docker.com/compose/install/)
 - [Kubectl](https://kubernetes.io/pt-br/docs/tasks/tools/)
 
-### Ambiente Completo com Docker e Kubernetes (Fase 02)
+### Execução local com docker compose
 
-Utilize o Kustomize para aplicar todos os manifestos de uma vez:
+1. **Crie o arquivo `.env`**: na raiz do projeto, copie o exemplo para `.env` e ajuste as variáveis (credenciais do banco, e-mail, etc.) conforme necessário:
 
- ```bash
- kubectl apply -k ./k8s/
- ```
+   ```bash
+   cp .env.example .env
+   ```
 
-Confirme se todos os Pods, Services e Deployments foram criados no namespace correto:
+2. **Suba o ambiente**: ainda na raiz do projeto, execute:
 
- ```bash
- kubectl get all -n mecanicadm
- ```
- 
-Para testar o HPA, criamos um bash script simples que gera stress na API:
-```bash
- ./k8s/load-test.sh
- ```
+   ```bash
+   docker compose up -d --build
+   ```
 
-Para ir mais a fundo em como executar o kubernetes no projeto, basta acessar a doc de [instruções do kubernetes](k8s/instrucoes.md).
+   Esse comando irá:
+   - Iniciar o container do PostgreSQL.
+   - Construir a imagem da API e iniciá-la, conectando-a ao banco.
+   - Executar as migrações do Flyway.
+   - Executar o `seeder`, que popula o banco com dados iniciais.
+
+3. **Aguarde os containers ficarem saudáveis**:
+
+   ```bash
+   docker compose ps
+   ```
+
+4. **Acesse a aplicação**: a API estará disponível em `http://localhost:8080`
+
+5. **Autentique-se** com as credenciais iniciais para explorar os endpoints (veja a seção [Credenciais de Acesso Iniciais](#-credenciais-de-acesso-iniciais)).
+
+6. **Para parar o ambiente**, execute:
+
+   ```bash
+   docker compose down
+   ```
+
+   > 💡 Para parar e remover também o volume do banco (apagando os dados), use `docker compose down -v`.
 
 ---
 

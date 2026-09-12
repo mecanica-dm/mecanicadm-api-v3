@@ -14,10 +14,13 @@ WORKDIR /app
 
 COPY --from=builder /app/target/*.jar /app/app.jar
 
+COPY newrelic/newrelic.jar /app/newrelic.jar
+COPY newrelic/newrelic.yml /app/newrelic.yml
+
 RUN chown -R appuser:appgroup /app
 
 USER appuser
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-javaagent:/app/newrelic.jar", "-jar", "/app/app.jar"]
