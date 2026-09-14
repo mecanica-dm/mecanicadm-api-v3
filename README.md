@@ -267,7 +267,7 @@ A rota de impressão de orçamentos retorna o arquivo PDF codificado em uma stri
 | **Dados**        | Spring Data JPA, PostgreSQL, Flyway (Migrations)      |
 | **Segurança**    | Spring Security, JWT (Java JWT)                       |
 | **Documentação** | Springdoc (Swagger/OpenAPI 3)                         |
-| **Testes**       | JUnit 5, Mockito, REST Assured, H2 (Banco em memória) |
+| **Testes**       | JUnit 5, Mockito, REST Assured, Testcontainers (PostgreSQL) |
 | **Build**        | Maven                                                 |
 | **Container**    | Docker, Docker Compose                                |
 
