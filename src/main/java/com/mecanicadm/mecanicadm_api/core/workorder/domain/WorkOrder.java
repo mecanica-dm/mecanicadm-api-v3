@@ -4,15 +4,22 @@ import com.mecanicadm.mecanicadm_api.core.workorder.domain.enums.LaborExecutionS
 import com.mecanicadm.mecanicadm_api.core.workorder.domain.enums.WorkOrderStatus;
 import com.mecanicadm.mecanicadm_api.core.workorder.exception.WorkOrderExceptions;
 import com.mecanicadm.mecanicadm_api.shared.domain.AuditDomain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
 import static org.springframework.util.StringUtils.hasText;
 
 public class WorkOrder extends AuditDomain {
+
+    private static final Logger log = LoggerFactory.getLogger(WorkOrder.class);
 
     private UUID id;
 
@@ -53,6 +60,7 @@ public class WorkOrder extends AuditDomain {
     public static WorkOrder create(UUID clientId, String vehicleId, String description) {
         WorkOrder workOrder = new WorkOrder(UUID.randomUUID(), clientId, vehicleId, description, WorkOrderStatus.RECEIVED);
         workOrder.create();
+        log.info("{\"message\": \"OS Criada\", \"workOrderId\": \"{}\", \"status\": \"{}\"}", workOrder.getId(), workOrder.getStatus());
         return workOrder;
     }
 
@@ -103,6 +111,7 @@ public class WorkOrder extends AuditDomain {
             throw new WorkOrderExceptions.InvalidStatusTransition(this.status.name(), WorkOrderStatus.DIAGNOSED.name());
         }
         this.status = WorkOrderStatus.DIAGNOSED;
+        log.info("{\"message\": \"OS Diagnosticada\", \"workOrderId\": \"{}\", \"status\": \"{}\"}", this.id, this.status);
     }
 
     public void markAsAwaitingExecution() {
@@ -115,6 +124,7 @@ public class WorkOrder extends AuditDomain {
         }
         this.status = WorkOrderStatus.IN_EXECUTION;
         this.executionStartAt = LocalDateTime.now();
+        log.info("{\"message\": \"OS Em execução\",  \"workOrderId\": \"{}\", \"status\": \"{}\"}", this.id, this.status);
     }
 
     public void startLaborItem(UUID laborItemId) {
@@ -140,6 +150,7 @@ public class WorkOrder extends AuditDomain {
 
         this.status = WorkOrderStatus.EXECUTION_COMPLETED;
         this.executionEndAt = LocalDateTime.now();
+        log.info("{\"message\": \"OS Finalizada\",  \"workOrderId\": \"{}\", \"status\": \"{}\"}", this.id, this.status);
     }
 
     public void markAsPaid() {

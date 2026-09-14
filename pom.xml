@@ -25,6 +25,8 @@
         <postgresql.version>42.7.6</postgresql.version>
         <spring-framework.version>6.2.3</spring-framework.version>
         <testcontainers.version>1.20.4</testcontainers.version>
+        <newrelic.logging.version>3.5.0</newrelic.logging.version>
+        <newrelic.agent.version>9.4.0</newrelic.agent.version>
     </properties>
 
     <dependencies>
@@ -144,6 +146,19 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- New Relic -->
+        <dependency>
+            <groupId>com.newrelic.logging</groupId>
+            <artifactId>logback13</artifactId>
+            <version>${newrelic.logging.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.newrelic.agent.java</groupId>
+            <artifactId>newrelic-api</artifactId>
+            <version>${newrelic.agent.version}</version>
         </dependency>
     </dependencies>
 
