@@ -271,6 +271,8 @@ A rota de impressão de orçamentos retorna o arquivo PDF codificado em uma stri
 | **Build**        | Maven                                                 |
 | **Container**    | Docker, Docker Compose                                |
 
+> ‼️ O banco utilizado foi PostgreSQL, a justificativa formal para o uso desse banco se encontra na **RFC 002 - Escolha do Banco de Dados** que pode ser acessada na seção RFCs.
+
 ---
 
 ## 🏛️ Arquitetura e Decisões
@@ -355,7 +357,9 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 
 Com a API em execução, a documentação interativa do Swagger UI fica disponível em:
 
-`http://localhost:8080/api/swagger-ui/index.html`
+**Local:** `http://localhost:8080/api/swagger-ui/index.html`
+
+**Produção:** `http://api.mecanicadm.com.br/api/swagger-ui/index.html`
 
 A especificação OpenAPI 3 pode ser acessada em `/v3/api-docs`.
 
