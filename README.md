@@ -312,6 +312,23 @@ A observabilidade da aplicação é feita através do **New Relic**. O agente Ja
 
 Para habilitar o envio dos dados, configure a variável de ambiente **`NEW_RELIC_LICENSE_KEY`** com a chave de licença da sua conta.
 
+- Overview:
+![overview01.png](docs/assets/newrelic/overview01.png)
+- Latência das APIs: 
+![latency.png](docs/assets/newrelic/latency.png)
+- CPU e Memória:
+![infra.png](docs/assets/newrelic/infra.png)
+- Logs estruturados:
+![logs.png](docs/assets/newrelic/logs.png)
+- Traces:
+![traces.png](docs/assets/newrelic/traces.png)
+- Alerta de erro:
+![alerta_erro.png](docs/assets/newrelic/alerta_erro.png)
+- Dashboard (Volume diário de OS, tempo médio de execução, Uptime, Erros da aplicação e mais!):
+![dashboard.png](docs/assets/newrelic/dashboard.png)
+- Healthcheck:
+![healthcheck.png](docs/assets/newrelic/healthcheck.png)
+
 ---
 
 ## 🏁 Como Começar
