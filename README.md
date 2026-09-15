@@ -308,9 +308,26 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 
 ## 👓 Observalibidade
 
-A observabilidade da aplicação é feita através do **New Relic**. O agente Java (`newrelic.jar`) é injetado no container via `-javaagent` (ver `Dockerfile`) e coleta métricas, traces distribuídos (APM) e instrumenta automaticamente Spring, JDBC e servlets. Os logs em JSON são enviados via integração Logback/New Relic (`logback-spring.xml`).
+A observabilidade da aplicação é feita através do **[New Relic](https://one.newrelic.com/nr1-core?account=8485340&filters=%28domain%20IN%20%28%27APM%27%2C%20%27EBPF%27%2C%20%27EXT%27%29%20AND%20type%20IN%20%28%27APPLICATION%27%2C%20%27SERVICE%27%2C%20%27SERVICE%27%29%29&state=ef9bcc8a-77d2-eeac-5561-2ee522dd417c)**. O agente Java (`newrelic.jar`) é injetado no container via `-javaagent` (ver `Dockerfile`) e coleta métricas, traces distribuídos (APM) e instrumenta automaticamente Spring, JDBC e servlets. Os logs em JSON são enviados via integração Logback/New Relic (`logback-spring.xml`).
 
 Para habilitar o envio dos dados, configure a variável de ambiente **`NEW_RELIC_LICENSE_KEY`** com a chave de licença da sua conta.
+
+- Overview:
+![overview01.png](docs/assets/newrelic/overview01.png)
+- Latência das APIs: 
+![latency.png](docs/assets/newrelic/latency.png)
+- CPU e Memória:
+![infra.png](docs/assets/newrelic/infra.png)
+- Logs estruturados:
+![logs.png](docs/assets/newrelic/logs.png)
+- Traces:
+![traces.png](docs/assets/newrelic/traces.png)
+- Alerta de erro:
+![alerta_erro.png](docs/assets/newrelic/alerta_erro.png)
+- Dashboard (Volume diário de OS, tempo médio de execução, Uptime, Erros da aplicação e mais!):
+![dashboard.png](docs/assets/newrelic/dashboard.png)
+- Healthcheck:
+![healthcheck.png](docs/assets/newrelic/healthcheck.png)
 
 ---
 
