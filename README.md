@@ -306,6 +306,14 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 
 ---
 
+## 👓 Observalibidade
+
+A observabilidade da aplicação é feita através do **New Relic**. O agente Java (`newrelic.jar`) é injetado no container via `-javaagent` (ver `Dockerfile`) e coleta métricas, traces distribuídos (APM) e instrumenta automaticamente Spring, JDBC e servlets. Os logs em JSON são enviados via integração Logback/New Relic (`logback-spring.xml`).
+
+Para habilitar o envio dos dados, configure a variável de ambiente **`NEW_RELIC_LICENSE_KEY`** com a chave de licença da sua conta.
+
+---
+
 ## 🏁 Como Começar
 
 ### Pré-requisitos
