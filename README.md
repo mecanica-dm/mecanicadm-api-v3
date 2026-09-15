@@ -267,9 +267,11 @@ A rota de impressão de orçamentos retorna o arquivo PDF codificado em uma stri
 | **Dados**        | Spring Data JPA, PostgreSQL, Flyway (Migrations)      |
 | **Segurança**    | Spring Security, JWT (Java JWT)                       |
 | **Documentação** | Springdoc (Swagger/OpenAPI 3)                         |
-| **Testes**       | JUnit 5, Mockito, REST Assured, H2 (Banco em memória) |
+| **Testes**       | JUnit 5, Mockito, REST Assured, Testcontainers (PostgreSQL) |
 | **Build**        | Maven                                                 |
 | **Container**    | Docker, Docker Compose                                |
+
+> ‼️ O banco utilizado foi PostgreSQL, a justificativa formal para o uso desse banco se encontra na **RFC 002 - Escolha do Banco de Dados** que pode ser acessada na seção RFCs.
 
 ---
 
@@ -301,6 +303,14 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 
 - **[RFC 001 - Escolha de nuvem](docs/rfc/001-escolha_de_nuvem.md)**
 - **[RFC 002 - Escolha de banco de dados](docs/rfc/002-escolha_banco_de_dados.md)**
+
+---
+
+## 👓 Observalibidade
+
+A observabilidade da aplicação é feita através do **New Relic**. O agente Java (`newrelic.jar`) é injetado no container via `-javaagent` (ver `Dockerfile`) e coleta métricas, traces distribuídos (APM) e instrumenta automaticamente Spring, JDBC e servlets. Os logs em JSON são enviados via integração Logback/New Relic (`logback-spring.xml`).
+
+Para habilitar o envio dos dados, configure a variável de ambiente **`NEW_RELIC_LICENSE_KEY`** com a chave de licença da sua conta.
 
 ---
 
@@ -355,7 +365,9 @@ O projeto segue uma arquitetura em camadas, inspirada em princípios de _Clean A
 
 Com a API em execução, a documentação interativa do Swagger UI fica disponível em:
 
-`http://localhost:8080/api/swagger-ui/index.html`
+**Local:** `http://localhost:8080/api/swagger-ui/index.html`
+
+**Produção:** `http://api.mecanicadm.com.br/api/swagger-ui/index.html`
 
 A especificação OpenAPI 3 pode ser acessada em `/v3/api-docs`.
 
@@ -363,6 +375,114 @@ A especificação OpenAPI 3 pode ser acessada em `/v3/api-docs`.
 
 - **Email**: `admin@mecanicadm.com`
 - **Senha**: `Senha123`
+
+### Principais Endpoints
+
+A lista completa de endpoints pode ser consultada no Swagger UI (`/api/swagger-ui/index.html`). Abaixo estão os principais endpoints da aplicação.
+
+#### 🔐 Autenticação e Usuários
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/user/login` | Autentica o usuário e retorna o token JWT |
+| POST   | `/user/forgot-password` | Solicita a recuperação de senha |
+| POST   | `/user/reset-password` | Confirma a redefinição de senha via token |
+| GET    | `/user/{id}` | Busca um usuário pelo ID |
+| POST   | `/user` | Cria um novo usuário |
+| PUT    | `/user` | Atualiza o usuário autenticado |
+| DELETE | `/user` | Remove (soft delete) o usuário autenticado |
+
+#### 👤 Clientes
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/clients` | Cria um novo cliente |
+| GET    | `/clients` | Lista clientes com filtros (`name`, `document`) e paginação |
+| PUT    | `/clients/{id}` | Atualiza um cliente |
+| DELETE | `/clients/{id}` | Remove (soft delete) um cliente |
+
+#### 🚗 Veículos
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/vehicle` | Cria um novo veículo |
+| GET    | `/vehicle` | Lista veículos com filtros (`licensePlate`, `model`, `brand`, `modelYear`) e paginação |
+| GET    | `/vehicle/{licensePlate}` | Busca um veículo pela placa |
+| PUT    | `/vehicle/{licensePlate}` | Atualiza um veículo |
+| DELETE | `/vehicle/{licensePlate}` | Remove um veículo |
+
+#### 🛠️ Mão de Obra (Serviços)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/labor` | Cria um novo serviço/mão de obra |
+| GET    | `/labor` | Lista serviços com filtro (`name`) e paginação |
+| GET    | `/labor/{id}` | Busca um serviço pelo ID |
+| PUT    | `/labor/{id}` | Atualiza um serviço |
+| DELETE | `/labor/{id}` | Remove um serviço |
+
+#### 📦 Materiais e Estoque
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/materials` | Cria um novo material |
+| GET    | `/materials` | Lista materiais com filtros (`name`, `brand`, `type`) e paginação |
+| GET    | `/materials/{id}` | Busca um material pelo ID |
+| PUT    | `/materials/{id}` | Atualiza um material |
+| DELETE | `/materials/{id}` | Remove (soft delete) um material |
+| GET    | `/stock-movements/{materialId}/statement` | Extrato de movimentações de estoque de um material |
+
+#### 🔩 Ordens de Serviço
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/work-orders` | Cria uma nova ordem de serviço |
+| GET    | `/work-orders` | Lista O.S. com filtros (`clientId`, `licensePlate`) e paginação |
+| GET    | `/work-orders/{id}` | Busca uma O.S. pelo ID |
+| GET    | `/work-orders/{id}/status` | Consulta o status atual da O.S. |
+| PUT    | `/work-orders/{id}` | Atualiza uma O.S. |
+| DELETE | `/work-orders/{id}` | Remove (soft delete) uma O.S. |
+
+#### 🔄 Workflow de O.S.
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/work-orders/{id}/step/diagnose` | Inicia o diagnóstico da O.S. |
+| POST   | `/work-orders/{id}/step/start-execution` | Inicia a execução da O.S. |
+| POST   | `/work-orders/{id}/step/finish-execution` | Finaliza a execução da O.S. |
+| POST   | `/work-orders/{id}/step/payment` | Registra o pagamento da O.S. |
+| POST   | `/work-orders/{id}/step/deliver` | Entrega a O.S. ao cliente |
+
+#### 🧰 Mão de Obra na O.S. e Materiais na O.S.
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/work-orders/{workOrderId}/labors/{laborId}/add` | Adiciona um serviço à O.S. |
+| POST   | `/work-orders/{workOrderId}/labors/{laborItemId}/start` | Inicia a execução do serviço |
+| POST   | `/work-orders/{workOrderId}/labors/{laborItemId}/finish` | Finaliza a execução do serviço |
+| GET    | `/work-orders/{workOrderId}/labors/{laborItemId}` | Busca um item de mão de obra da O.S. |
+| POST   | `/work-orders/{workOrderId}/labors/{laborItemId}/remove` | Remove um serviço da O.S. |
+| POST   | `/work-orders/{workOrderId}/materials/{materialId}/add` | Adiciona um material à O.S. (deduz do estoque) |
+| POST   | `/work-orders/{workOrderId}/materials/{materialId}/remove` | Remove um material da O.S. |
+
+#### 💰 Orçamentos
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/work-orders/{workOrderId}/budget/send` | Envia o orçamento para o cliente |
+| PATCH  | `/work-orders/{workOrderId}/budget` | Ajusta manualmente o valor total do orçamento |
+| POST   | `/work-orders/{workOrderId}/budget/recalculate` | Recalcula o orçamento automaticamente |
+| POST   | `/work-orders/{workOrderId}/budget/decision` | Registra a decisão do cliente sobre o orçamento |
+| GET    | `/work-orders/{workOrderId}/budget/print` | Gera o orçamento em PDF (Base64) |
+| GET    | `/budget-decision/{token}/form` | Página pública de resposta ao orçamento |
+| POST   | `/budget-decision/{token}` | Processa a resposta pública do cliente via token |
+
+#### 📊 Analytics
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET    | `/analytics/work-orders/execution-time` | Relatório de tempo de execução das O.S. |
+| GET    | `/analytics/labors/execution-time` | Relatório de tempo de execução dos serviços |
 
 ---
 

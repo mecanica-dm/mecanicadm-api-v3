@@ -15,12 +15,12 @@ A equipe precisa definir o banco de dados da API de gestão de oficinas. Recomen
 
 ## 2. Contexto
 
-O projeto já utiliza **PostgreSQL com Flyway** para migrations e **H2** para testes, conforme documentado no `README`. A
-Fase 03 requer um banco gerenciado, resiliente e com backups automáticos.
+O projeto já utiliza **PostgreSQL com Flyway** para migrations e **Testcontainers com PostgreSQL** para os testes de
+integração, conforme documentado no `README`. A Fase 03 requer um banco gerenciado, resiliente e com backups automáticos.
 
 ## 3. Objetivos
 
-- Manter compatibilidade com o stack já existente (JPA, Flyway, H2 em testes).
+- Manter compatibilidade com o stack já existente (JPA, Flyway, Testcontainers em testes).
 - Garantir integridade relacional e transações ACID.
 
 ## 4. Alternativas Consideradas
