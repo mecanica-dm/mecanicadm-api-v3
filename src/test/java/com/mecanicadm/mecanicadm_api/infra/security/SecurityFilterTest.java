@@ -1,6 +1,10 @@
 package com.mecanicadm.mecanicadm_api.infra.security;
 
+import com.mecanicadm.mecanicadm_api.core.client.domain.Client;
+import com.mecanicadm.mecanicadm_api.core.client.domain.port.ClientGateway;
 import com.mecanicadm.mecanicadm_api.core.user.domain.User;
+import com.mecanicadm.mecanicadm_api.core.user.domain.enums.TokenRole;
+import com.mecanicadm.mecanicadm_api.core.user.domain.port.TokenClaims;
 import com.mecanicadm.mecanicadm_api.core.user.domain.port.TokenService;
 import com.mecanicadm.mecanicadm_api.core.user.domain.port.UserGateway;
 import jakarta.servlet.FilterChain;
@@ -23,6 +27,7 @@ class SecurityFilterTest {
     private SecurityFilter securityFilter;
     private TokenService tokenService;
     private UserGateway userGateway;
+    private ClientGateway clientGateway;
     private HttpServletRequest request;
     private HttpServletResponse response;
     private FilterChain filterChain;
@@ -31,7 +36,8 @@ class SecurityFilterTest {
     void setUp() {
         tokenService = mock(TokenService.class);
         userGateway = mock(UserGateway.class);
-        securityFilter = new SecurityFilter(tokenService, userGateway);
+        clientGateway = mock(ClientGateway.class);
+        securityFilter = new SecurityFilter(tokenService, userGateway, clientGateway);
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         filterChain = mock(FilterChain.class);
@@ -47,13 +53,36 @@ class SecurityFilterTest {
         UserAdapter userAdapter = new UserAdapter(user);
 
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(tokenService.validateToken(token)).thenReturn(email);
+        when(tokenService.decodeToken(token)).thenReturn(new TokenClaims(email, TokenRole.USER));
         when(userGateway.findByEmail(email)).thenReturn(Optional.of(user));
 
         securityFilter.doFilterInternal(request, response, filterChain);
 
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         assertEquals(userAdapter, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("Deve autenticar o cliente quando o token tem role CLIENT")
+    void shouldAuthenticateClientWhenTokenHasClientRole() throws Exception {
+        String token = "client-token";
+        String document = "529.982.247-25";
+        Client client = Client.restore(
+                java.util.UUID.randomUUID(), "Cliente Teste", "cliente@teste.com",
+                "52998224725", "48999999000",
+                java.time.LocalDateTime.now(), java.time.LocalDateTime.now(), null);
+
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(tokenService.decodeToken(token)).thenReturn(new TokenClaims(document, TokenRole.CLIENT));
+        when(clientGateway.findByDocument("52998224725")).thenReturn(Optional.of(client));
+
+        securityFilter.doFilterInternal(request, response, filterChain);
+
+        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
+        assertEquals(client, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        verify(clientGateway).findByDocument("52998224725");
+        verify(userGateway, never()).findByEmail(anyString());
         verify(filterChain).doFilter(request, response);
     }
 
@@ -65,7 +94,7 @@ class SecurityFilterTest {
         PrintWriter writer = new PrintWriter(stringWriter);
 
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(tokenService.validateToken(token)).thenThrow(new RuntimeException("Token inválido"));
+        when(tokenService.decodeToken(token)).thenThrow(new RuntimeException("Token inválido"));
         when(response.getWriter()).thenReturn(writer);
 
         securityFilter.doFilterInternal(request, response, filterChain);
@@ -93,8 +122,24 @@ class SecurityFilterTest {
         String email = "notfound@test.com";
 
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(tokenService.validateToken(token)).thenReturn(email);
+        when(tokenService.decodeToken(token)).thenReturn(new TokenClaims(email, TokenRole.USER));
         when(userGateway.findByEmail(email)).thenReturn(Optional.empty());
+
+        securityFilter.doFilterInternal(request, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("Deve continuar a cadeia de filtros se o cliente do token não for encontrado")
+    void shouldContinueFilterChainWhenClientNotFound() throws Exception {
+        String token = "client-token";
+        String document = "52998224725";
+
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(tokenService.decodeToken(token)).thenReturn(new TokenClaims(document, TokenRole.CLIENT));
+        when(clientGateway.findByDocument(document)).thenReturn(Optional.empty());
 
         securityFilter.doFilterInternal(request, response, filterChain);
 

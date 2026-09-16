@@ -1,6 +1,9 @@
 package com.mecanicadm.mecanicadm_api.infra.security;
 
+import com.mecanicadm.mecanicadm_api.core.client.domain.port.ClientGateway;
 import com.mecanicadm.mecanicadm_api.core.user.domain.User;
+import com.mecanicadm.mecanicadm_api.core.user.domain.enums.TokenRole;
+import com.mecanicadm.mecanicadm_api.core.user.domain.port.TokenClaims;
 import com.mecanicadm.mecanicadm_api.core.user.domain.port.TokenService;
 import com.mecanicadm.mecanicadm_api.core.user.domain.port.UserGateway;
 import jakarta.servlet.FilterChain;
@@ -16,17 +19,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
     private final UserGateway userGateway;
+    private final ClientGateway clientGateway;
 
     @Autowired
-    public SecurityFilter(TokenService tokenService, UserGateway userGateway) {
+    public SecurityFilter(TokenService tokenService, UserGateway userGateway, ClientGateway clientGateway) {
         this.tokenService = tokenService;
         this.userGateway = userGateway;
+        this.clientGateway = clientGateway;
     }
 
     @Override
@@ -34,12 +40,11 @@ public class SecurityFilter extends OncePerRequestFilter {
         String token = this.recoverToken(request);
         if (token != null) {
             try {
-                String subject = tokenService.validateToken(token);
-                User user = userGateway.findByEmail(subject).orElse(null);
-                if (user != null) {
-                    UserDetails userDetails = new UserAdapter(user);
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                TokenClaims claims = tokenService.decodeToken(token);
+                if (TokenRole.CLIENT == claims.role()) {
+                    this.authenticateClient(claims.subject());
+                } else {
+                    this.authenticateUser(claims.subject());
                 }
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -50,6 +55,27 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private void authenticateUser(String subject) {
+        User user = userGateway.findByEmail(subject).orElse(null);
+        if (user != null) {
+            UserDetails userDetails = new UserAdapter(user);
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+    }
+
+    private void authenticateClient(String document) {
+        if (document == null || document.isBlank()) {
+            return;
+        }
+
+        String digits = document.replaceAll("\\D", "");
+        clientGateway.findByDocument(digits).ifPresent(client ->
+                SecurityContextHolder.getContext()
+                        .setAuthentication(new UsernamePasswordAuthenticationToken(client, null, List.of()))
+        );
     }
 
     private String recoverToken(HttpServletRequest request) {

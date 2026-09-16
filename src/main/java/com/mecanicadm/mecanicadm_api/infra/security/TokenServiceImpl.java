@@ -4,6 +4,9 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.mecanicadm.mecanicadm_api.core.user.domain.enums.TokenRole;
+import com.mecanicadm.mecanicadm_api.core.user.domain.port.TokenClaims;
 import com.mecanicadm.mecanicadm_api.core.user.domain.port.TokenService;
 import com.mecanicadm.mecanicadm_api.infra.security.exception.InvalidTokenException;
 import com.mecanicadm.mecanicadm_api.infra.security.exception.TokenGenerationException;
@@ -35,13 +38,17 @@ public class TokenServiceImpl implements TokenService {
     }
 
     public String validateToken(String token) {
+        return decodeToken(token).subject();
+    }
+
+    public TokenClaims decodeToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.require(algorithm)
+            DecodedJWT decoded = JWT.require(algorithm)
                     .withIssuer(ISSUER)
                     .build()
-                    .verify(token)
-                    .getSubject();
+                    .verify(token);
+            return new TokenClaims(decoded.getSubject(), TokenRole.fromClaim(decoded.getClaim("role").asString()));
         } catch (JWTVerificationException exception) {
             throw new InvalidTokenException();
         }

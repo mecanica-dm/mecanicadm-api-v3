@@ -12,6 +12,8 @@ public interface ClientGateway {
 
     Optional<Client> findById(UUID id);
 
+    Optional<Client> findByDocument(String document);
+
     boolean existsByDocument(String document);
 
     boolean existsByEmail(String email);

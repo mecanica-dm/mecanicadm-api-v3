@@ -58,6 +58,11 @@ public class ClientRepositoryImpl implements ClientGateway {
     }
 
     @Override
+    public Optional<Client> findByDocument(String document) {
+        return jpaRepository.findByDocument(document).map(ClientJpaMapper::toDomain);
+    }
+
+    @Override
     public boolean existsByDocument(String document) {
         return jpaRepository.existsByDocument(document);
     }
