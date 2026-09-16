@@ -7,10 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ClientJpaRepository extends JpaRepository<ClientJpaEntity, UUID>, JpaSpecificationExecutor<ClientJpaEntity> {
+
+    Optional<ClientJpaEntity> findByDocument(String document);
 
     @Query(value = "SELECT EXISTS(SELECT 1 FROM clients WHERE document = :document)", nativeQuery = true)
     boolean existsByDocument(@Param("document") String document);
